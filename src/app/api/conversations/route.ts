@@ -1,7 +1,22 @@
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const showArchived = searchParams.get("archived") === "true";
+
+  const whereClause: any = {
+    deletedAt: null,
+  };
+
+  // Если запрашиваем заархивированные, показываем только их
+  if (showArchived) {
+    whereClause.archivedAt = { not: null };
+  } else {
+    // Иначе показываем только активные (не заархивированные)
+    whereClause.archivedAt = null;
+  }
+
   const conversations = await prisma.conversation.findMany({
     include: {
       messages: {
@@ -11,9 +26,7 @@ export async function GET() {
     orderBy: {
       createdAt: "desc",
     },
-    where: {
-      deletedAt: null,
-    },
+    where: whereClause,
   });
 
   return NextResponse.json(conversations);

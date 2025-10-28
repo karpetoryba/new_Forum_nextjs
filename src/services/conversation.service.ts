@@ -1,5 +1,8 @@
-async function fetchConversations() {
-  const response = await fetch("/api/conversations");
+async function fetchConversations(archived?: boolean) {
+  const url = archived
+    ? "/api/conversations?archived=true"
+    : "/api/conversations";
+  const response = await fetch(url);
   if (!response.ok) {
     throw new Error("Failed to fetch conversations");
   }
