@@ -32,3 +32,29 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(conversations);
 }
 
+export async function POST(request: NextRequest) {
+  try {
+    const { title, image } = await request.json();
+    
+    const data: any = {};
+    if (title) {
+      data.title = title;
+    }
+    if (image) {
+      data.image = image;
+    }
+    
+    const newConversation = await prisma.conversation.create({
+      data,
+    });
+
+    return NextResponse.json(newConversation, { status: 201 });
+  } catch (error) {
+    console.error("Error creating conversation:", error);
+    return NextResponse.json(
+      { error: "Failed to create conversation" },
+      { status: 500 }
+    );
+  }
+}
+

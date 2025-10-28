@@ -26,10 +26,25 @@ async function archiveConversation(id: string) {
   return response.json();
 }
 
+async function createConversation(data: { title: string; image?: string }) {
+  const response = await fetch("/api/conversations", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to create conversation");
+  }
+  return response.json();
+}
+
 const ConversationService = {
   fetchConversations,
   fetchConversationById,
   archiveConversation,
+  createConversation,
 };
 
 export default ConversationService;

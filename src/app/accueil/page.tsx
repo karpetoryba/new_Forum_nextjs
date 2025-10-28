@@ -1,11 +1,14 @@
 import ConversationCarousel from "@/components/app/conversation/ConversationCarousel";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Plus } from "lucide-react";
 
 export default function AccueilPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <div className="container mx-auto py-12 md:py-16 lg:py-20">
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-6">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
             Blog
           </h1>
@@ -14,6 +17,14 @@ export default function AccueilPage() {
             <br />
             Partagez vos pensées et participez à la conversation.
           </p>
+          <div className="pt-4">
+            <Button size="lg" asChild>
+              <Link href="/conversations/new">
+                <Plus className="h-5 w-5 mr-2" />
+                Créer une conversation
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
 
