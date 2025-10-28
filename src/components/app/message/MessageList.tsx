@@ -74,7 +74,9 @@ if (isError) {
           </div>
         )}
       </div>
-      <MessageForm conversationId={conversationId} onCreateMessage={createMessage}/>
+      <div className="pb-4">
+        <MessageForm conversationId={conversationId} onCreateMessage={createMessage}/>
+      </div>
     </div>
   );
 }

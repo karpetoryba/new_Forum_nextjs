@@ -14,7 +14,7 @@ export default async function ConversationDetailPage({
   const conversation = await response.json();
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto pb-16 md:pb-20">
       <h1>{conversation?.title}</h1>
       <Button variant="link" asChild>
         <Link href="http://localhost:3000">
