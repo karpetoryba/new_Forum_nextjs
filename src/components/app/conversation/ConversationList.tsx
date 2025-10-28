@@ -1,37 +1,52 @@
 "use client";
 
 import ConversationService from "@/services/conversation.service";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import ConversationCard from "./ConversationCard";
 import { ConversationWithExtend } from "@/types/conversation.type";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ConversationList() {
-  const [conversations, setConversations] = useState<ConversationWithExtend[]>(
-    []
-  );
+  const { data: conversations, isLoading, isError } = useQuery({
+    queryKey: ["conversations"],
+    queryFn: async () => {
+      return await ConversationService.fetchConversations();
+    },
+  });
 
-  useEffect(() => {
-    getAllConversations();
-  }, []);
+  if (isLoading) {
+    return (
+      <div className="container mx-auto">
+        <h1>Liste des conversations</h1>
+        <div className="flex flex-col gap-4 mt-4">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-20 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
-  const getAllConversations = async () => {
-    try {
-      const data = await ConversationService.fetchConversations();
-      setConversations(data);
-    } catch (error) {
-      console.error("Error fetching conversations:", error);
-    }
-  };
+  if (isError) {
+    return (
+      <div className="container mx-auto">
+        <h1>Liste des conversations</h1>
+        <p className="text-destructive mt-4">
+          Erreur lors de la récupération des conversations
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto">
       <h1>Liste des conversations</h1>
 
-      {conversations.length === 0 ? (
-        <p>Aucune conversation disponible.</p>
+      {!conversations || conversations.length === 0 ? (
+        <p className="mt-4">Aucune conversation disponible.</p>
       ) : (
-        <div className="flex flex-col gap-4">
-          {conversations.map((conversation) => (
+        <div className="flex flex-col gap-4 mt-4">
+          {(conversations as ConversationWithExtend[]).map((conversation) => (
             <ConversationCard
               key={conversation.id}
               conversation={conversation}
