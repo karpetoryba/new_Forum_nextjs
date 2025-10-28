@@ -8,7 +8,7 @@ export async function POST(
   try {
     const { id } = await params;
 
-    // Проверяем, существует ли conversation
+    // check if conversation exists
     const conversation = await prisma.conversation.findUnique({
       where: { id },
     });
@@ -20,7 +20,7 @@ export async function POST(
       );
     }
 
-    // Архивируем conversation (soft delete через archivedAt)
+    // archive a conversation (soft delete via archivedAt)
     const archivedConversation = await prisma.conversation.update({
       where: { id },
       data: {

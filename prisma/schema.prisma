@@ -17,6 +17,7 @@ datasource db {
 model Conversation {
   id    String  @id @default(cuid())
   title String?
+  image String?
 
   messages Message[]
 
