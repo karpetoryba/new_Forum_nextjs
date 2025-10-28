@@ -2,6 +2,9 @@ import { Message } from "@/generated/prisma";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale/fr";
+import { Button } from "@/components/ui/button";
+import MessageService from "@/services/message.service";
+import { Trash } from "lucide-react";
 
 interface MessageItemProps {
   message: Message;
@@ -24,6 +27,9 @@ export default function MessageItem({ message }: MessageItemProps) {
             {formattedDate}
           </p>
         )}
+        <Button variant="ghost"  title="Supprimer le message" size="icon" onClick={() => MessageService.deleteMessage(message.id)}>
+            <Trash className="h-4 w-4" />
+        </Button>
       </CardContent>
     </Card>
   );
