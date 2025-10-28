@@ -23,7 +23,7 @@ export default function AccueilPage() {
           <h2 className="text-2xl font-semibold mb-6 text-center">
             Conversations en vedette
           </h2>
-          <ConversationCarousel autoScrollInterval={3000} />
+          <ConversationCarousel autoScrollInterval={6000} />
         </div>
       </section>
     </div>
