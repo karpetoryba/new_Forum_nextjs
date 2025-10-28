@@ -4,8 +4,8 @@ import Link from "next/link";
 import { Github, Twitter } from "lucide-react";
 
 const navigation = [
-  { name: "Accueil", href: "/" },
-  { name: "Conversations", href: "/" },
+  { name: "Accueil", href: "/accueil" },
+  { name: "Conversations", href: "/conversations" },
   { name: "À propos", href: "/about" },
 ];
 

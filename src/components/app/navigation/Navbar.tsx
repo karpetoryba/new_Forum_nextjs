@@ -3,14 +3,19 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Home, MessageSquare } from "lucide-react";
+import { Home, MessageSquare, MessagesSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navigation = [
   {
     name: "Accueil",
-    href: "/",
+    href: "/accueil",
     icon: Home,
+  },
+  {
+    name: "Conversations",
+    href: "/conversations",
+    icon: MessagesSquare,
   },
 ];
 
@@ -22,7 +27,7 @@ export default function Navbar() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo / Brand */}
         <Link
-          href="/"
+          href="/accueil"
           className="flex items-center space-x-2 transition-opacity hover:opacity-80"
         >
           <MessageSquare className="h-5 w-5" />
@@ -32,7 +37,9 @@ export default function Navbar() {
         {/* Navigation Links */}
         <div className="flex items-center gap-2">
           {navigation.map((item) => {
-            const isActive = pathname === item.href;
+            // Определяем активность: точное совпадение или начало пути
+            const isActive = pathname === item.href || 
+              (item.href !== "/accueil" && pathname?.startsWith(item.href));
             const Icon = item.icon;
 
             return (
