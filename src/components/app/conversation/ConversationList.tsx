@@ -22,12 +22,12 @@ export default function ConversationList() {
   if (isLoading) {
     return (
       <div className="container mx-auto">
-        <div className="flex items-center justify-between mb-4">
-          <h1>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold">
             {showArchived
               ? "Conversations archivées"
-              : "Liste des conversations"}
-          </h1>
+              : "Toutes les conversations"}
+          </h2>
           <Button
             variant="outline"
             onClick={() => setShowArchived(!showArchived)}
@@ -46,9 +46,9 @@ export default function ConversationList() {
             )}
           </Button>
         </div>
-        <div className="flex flex-col gap-4 mt-4">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-20 w-full" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} className="h-80 w-full" />
           ))}
         </div>
       </div>
@@ -58,12 +58,12 @@ export default function ConversationList() {
   if (isError) {
     return (
       <div className="container mx-auto">
-        <div className="flex items-center justify-between mb-4">
-          <h1>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold">
             {showArchived
               ? "Conversations archivées"
-              : "Liste des conversations"}
-          </h1>
+              : "Toutes les conversations"}
+          </h2>
           <Button
             variant="outline"
             onClick={() => setShowArchived(!showArchived)}
@@ -91,12 +91,12 @@ export default function ConversationList() {
 
   return (
     <div className="container mx-auto">
-      <div className="flex items-center justify-between mb-4">
-        <h1>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold">
           {showArchived
             ? "Conversations archivées"
-            : "Liste des conversations"}
-        </h1>
+            : "Toutes les conversations"}
+        </h2>
         <Button
           variant="outline"
           onClick={() => setShowArchived(!showArchived)}
