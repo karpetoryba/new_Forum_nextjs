@@ -16,45 +16,49 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { signInSchema } from "@/lib/auth/zod";
+import { createUserSchema } from "@/lib/auth/zod";
 
-type SignInFormState = {
+type SignUpFormState = {
+  name: string;
   email: string;
   password: string;
 };
 
-type SignInFormErrors = Partial<Record<keyof SignInFormState, string>> & {
+type SignUpFormErrors = Partial<Record<keyof SignUpFormState, string>> & {
   form?: string;
 };
 
-export default function SignInForm() {
+export default function SignUpForm() {
   const router = useRouter();
-  const [values, setValues] = useState<SignInFormState>({
+  const [values, setValues] = useState<SignUpFormState>({
+    name: "",
     email: "",
     password: "",
   });
-  const [errors, setErrors] = useState<SignInFormErrors>({});
+  const [errors, setErrors] = useState<SignUpFormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (field: keyof SignInFormState) => (event: ChangeEvent<HTMLInputElement>) => {
-    const nextValue = event.target.value;
-    setValues((previous) => ({ ...previous, [field]: nextValue }));
-    setErrors((previous) => ({ ...previous, [field]: undefined, form: undefined }));
-  };
+  const handleChange =
+    (field: keyof SignUpFormState) => (event: ChangeEvent<HTMLInputElement>) => {
+      const nextValue = event.target.value;
+      setValues((previous) => ({ ...previous, [field]: nextValue }));
+      setErrors((previous) => ({ ...previous, [field]: undefined, form: undefined }));
+    };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const parsed = signInSchema.safeParse(values);
+    const parsed = createUserSchema.safeParse(values);
 
     if (!parsed.success) {
       const fieldErrors = parsed.error.flatten().fieldErrors;
       setErrors({
+        name: fieldErrors.name?.[0],
         email: fieldErrors.email?.[0],
         password: fieldErrors.password?.[0],
       });
       toast.error("Validation échouée", {
-        description: "Vérifiez vos identifiants et réessayez.",
+        description: "Vérifiez les informations fournies et réessayez.",
       });
       return;
     }
@@ -62,7 +66,7 @@ export default function SignInForm() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/auth/signin", {
+      const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -73,28 +77,34 @@ export default function SignInForm() {
       const payload = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        if (response.status === 400 && payload?.details?.fieldErrors) {
+        if (response.status === 409) {
+          setErrors({
+            email: payload.error || "Un compte existe déjà avec cet email.",
+          });
+        } else if (response.status === 400 && payload?.details?.fieldErrors) {
           const fieldErrors = payload.details.fieldErrors as Record<string, string[]>;
           setErrors({
+            name: fieldErrors.name?.[0],
             email: fieldErrors.email?.[0],
             password: fieldErrors.password?.[0],
             form: payload.error,
           });
         } else {
           setErrors({
-            form: payload.error || "Échec de la connexion",
+            form: payload.error || "Impossible de créer le compte",
           });
         }
 
-        toast.error(payload.error || "Impossible de se connecter");
+        toast.error(payload.error || "Impossible de créer le compte");
         return;
       }
 
-      toast.success("Connexion réussie");
-      router.push("/accueil");
-      router.refresh();
+      toast.success("Compte créé avec succès", {
+        description: "Vous pouvez maintenant vous connecter.",
+      });
+      router.push("/signin");
     } catch (error) {
-      console.error("[SignInForm]", error);
+      console.error("[SignUpForm]", error);
       toast.error("Une erreur est survenue");
       setErrors({
         form: "Une erreur est survenue. Veuillez réessayer.",
@@ -107,12 +117,33 @@ export default function SignInForm() {
   return (
     <Card className="mx-auto w-full max-w-md border-none shadow-lg">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-semibold">Connexion</CardTitle>
-        <CardDescription>Entrez votre email et votre mot de passe pour accéder à votre compte.</CardDescription>
+        <CardTitle className="text-2xl font-semibold">Créer un compte</CardTitle>
+        <CardDescription>Renseignez vos informations pour rejoindre la plateforme.</CardDescription>
       </CardHeader>
 
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+          <div className="space-y-2">
+            <label htmlFor="name" className="text-sm font-medium text-muted-foreground">
+              Nom
+            </label>
+            <Input
+              id="name"
+              value={values.name}
+              onChange={handleChange("name")}
+              placeholder="Votre nom"
+              autoComplete="name"
+              aria-invalid={Boolean(errors.name)}
+              aria-describedby={errors.name ? "name-error" : undefined}
+              required
+            />
+            {errors.name && (
+              <p id="name-error" className="text-sm text-destructive">
+                {errors.name}
+              </p>
+            )}
+          </div>
+
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium text-muted-foreground">
               Email
@@ -145,7 +176,7 @@ export default function SignInForm() {
               value={values.password}
               onChange={handleChange("password")}
               placeholder="********"
-              autoComplete="current-password"
+              autoComplete="new-password"
               aria-invalid={Boolean(errors.password)}
               aria-describedby={errors.password ? "password-error" : undefined}
               required
@@ -167,21 +198,22 @@ export default function SignInForm() {
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Connexion en cours...
+                Création du compte...
               </>
             ) : (
-              "Se connecter"
+              "S'inscrire"
             )}
           </Button>
         </form>
       </CardContent>
 
       <CardFooter className="flex items-center justify-center text-sm text-muted-foreground">
-        Pas encore de compte ?
+        Vous avez déjà un compte ?
         <Button asChild variant="link" size="sm" className="px-1">
-          <Link href="/signup">Créer un compte</Link>
+          <Link href="/signin">Se connecter</Link>
         </Button>
       </CardFooter>
     </Card>
   );
 }
+
