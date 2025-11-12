@@ -50,6 +50,8 @@ model User {
   name String?
   avatar String?
   bio String?
+  emailVerified DateTime?
+
 
   createdAt DateTime @default(now())
   updatedAt DateTime? @updatedAt
