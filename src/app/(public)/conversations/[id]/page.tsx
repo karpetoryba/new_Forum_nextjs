@@ -1,5 +1,7 @@
 import MessageList from "@/components/app/message/MessageList";
-
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 export default async function ConversationDetailPage({
   params,
 }: {
@@ -12,13 +14,18 @@ export default async function ConversationDetailPage({
   const conversation = await response.json();
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto pb-16 md:pb-20">
       <h1>{conversation?.title}</h1>
-
-      <div>
-        {/* on affiche la liste des messages de la conversation */}
-        <MessageList conversationId={params.id} />
-      </div>
+      <Button variant="link" asChild>
+        <Link href="http://localhost:3000">
+          <ArrowLeft className="h-4 w-4" />
+        Retour
+      </Link>
+    </Button>
+    <div>
+      {/* on affiche la liste des messages de la conversation */}
+      <MessageList conversationId={params.id} />
     </div>
-  );
+  </div>
+);
 }

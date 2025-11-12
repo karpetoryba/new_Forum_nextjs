@@ -17,6 +17,7 @@ datasource db {
 model Conversation {
   id    String  @id @default(cuid())
   title String?
+  image String?
 
   messages Message[]
 
@@ -41,4 +42,31 @@ model Message {
   conversationId String?
 
   @@map("message")
+}
+
+model User {
+  id String @id @default(cuid())
+  email String @unique
+  password String
+  name String?
+  avatar String?
+  bio String?
+  emailVerified DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+  archivedAt DateTime?
+
+  @@map("user")
+}
+
+model VerificationToken {
+  identifier String
+  token      String @unique
+  expires    DateTime
+  createdAt  DateTime @default(now())
+
+  @@unique([identifier, token])
+  @@map("verification_token")
 }

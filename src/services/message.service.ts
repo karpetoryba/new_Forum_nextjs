@@ -1,7 +1,3 @@
-interface FetchMessagesParams {
-  conversationId?: string;
-
-}
 export async function fetchMessages(params?: { conversationId?: string }) {
   const queryParams = new URLSearchParams();
   if (params?.conversationId) {
@@ -31,9 +27,23 @@ async function createMessage(content: string, conversationId: string) {
   return response.json();
 }
 
+async function deleteMessage(id: string) {
+  const response = await fetch(`/api/messages?id=${id}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to delete message");
+  }
+  return response.json(); 
+}
+
 const MessageService = {
   fetchMessages,
   createMessage,
+  deleteMessage,
 };
 
 export default MessageService;
+
+
+

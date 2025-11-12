@@ -1,37 +1,130 @@
 "use client";
 
 import ConversationService from "@/services/conversation.service";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import ConversationCard from "./ConversationCard";
 import { ConversationWithExtend } from "@/types/conversation.type";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Archive, ArchiveRestore } from "lucide-react";
+import { useState } from "react";
 
 export default function ConversationList() {
-  const [conversations, setConversations] = useState<ConversationWithExtend[]>(
-    []
-  );
+  const [showArchived, setShowArchived] = useState(false);
 
-  useEffect(() => {
-    getAllConversations();
-  }, []);
+  const { data: conversations, isLoading, isError } = useQuery({
+    queryKey: ["conversations", showArchived],
+    queryFn: async () => {
+      return await ConversationService.fetchConversations(showArchived);
+    },
+  });
 
-  const getAllConversations = async () => {
-    try {
-      const data = await ConversationService.fetchConversations();
-      setConversations(data);
-    } catch (error) {
-      console.error("Error fetching conversations:", error);
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="container mx-auto pb-16 md:pb-20">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold">
+            {showArchived
+              ? "Conversations archivées"
+              : "Toutes les conversations"}
+          </h2>
+          <Button
+            variant="outline"
+            onClick={() => setShowArchived(!showArchived)}
+            className="gap-2"
+          >
+            {showArchived ? (
+              <>
+                <ArchiveRestore className="h-4 w-4" />
+                Voir les conversations actives
+              </>
+            ) : (
+              <>
+                <Archive className="h-4 w-4" />
+                Voir les conversations archivées
+              </>
+            )}
+          </Button>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} className="h-80 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="container mx-auto pb-16 md:pb-20">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold">
+            {showArchived
+              ? "Conversations archivées"
+              : "Toutes les conversations"}
+          </h2>
+          <Button
+            variant="outline"
+            onClick={() => setShowArchived(!showArchived)}
+            className="gap-2"
+          >
+            {showArchived ? (
+              <>
+                <ArchiveRestore className="h-4 w-4" />
+                Voir les conversations actives
+              </>
+            ) : (
+              <>
+                <Archive className="h-4 w-4" />
+                Voir les conversations archivées
+              </>
+            )}
+          </Button>
+        </div>
+        <p className="text-destructive mt-4">
+          Erreur lors de la récupération des conversations
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto">
-      <h1>Liste des conversations</h1>
+    <div className="container mx-auto pb-16 md:pb-20">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold">
+          {showArchived
+            ? "Conversations archivées"
+            : "Toutes les conversations"}
+        </h2>
+        <Button
+          variant="outline"
+          onClick={() => setShowArchived(!showArchived)}
+          className="gap-2"
+        >
+          {showArchived ? (
+            <>
+              <ArchiveRestore className="h-4 w-4" />
+              Voir les conversations actives
+            </>
+          ) : (
+            <>
+              <Archive className="h-4 w-4" />
+              Voir les conversations archivées
+            </>
+          )}
+        </Button>
+      </div>
 
-      {conversations.length === 0 ? (
-        <p>Aucune conversation disponible.</p>
+      {!conversations || conversations.length === 0 ? (
+        <p className="mt-4">
+          {showArchived
+            ? "Aucune conversation archivée."
+            : "Aucune conversation disponible."}
+        </p>
       ) : (
-        <div className="flex flex-col gap-4">
-          {conversations.map((conversation) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+          {(conversations as ConversationWithExtend[]).map((conversation) => (
             <ConversationCard
               key={conversation.id}
               conversation={conversation}

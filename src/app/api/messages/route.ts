@@ -42,3 +42,46 @@ export async function POST(request: NextRequest) {
   }
 
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    // get id from query params
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "Message ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // verifier si le message existe
+    const message = await prisma.message.findUnique({
+      where: { id },
+    });
+
+    if (!message) {
+      return NextResponse.json(
+        { error: "Message not found" },
+        { status: 404 }
+      );
+    }
+
+    // Soft delete (mettre à jour deletedAt au lieu de supprimer physiquement)
+    const deletedMessage = await prisma.message.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+
+    return NextResponse.json(deletedMessage);
+  } catch (error) {
+    console.error("Error deleting message:", error);
+    return NextResponse.json(
+      { error: "Failed to delete message" },
+      { status: 500 }
+    );
+  }
+}
