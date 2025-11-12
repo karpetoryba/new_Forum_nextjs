@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
 import { ZodError } from "zod";
 
 import { prisma } from "@/lib/prisma";
 import { createUserSchema } from "@/lib/auth/zod";
+
+const SALT_ROUNDS = 12;
 
 export async function POST(request: Request) {
   try {
@@ -20,10 +23,12 @@ export async function POST(request: Request) {
       );
     }
 
+    const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
+
     const user = await prisma.user.create({
       data: {
         email: data.email,
-        password: data.password,
+        password: hashedPassword,
         name: data.name,
       },
       select: {
@@ -54,4 +59,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
