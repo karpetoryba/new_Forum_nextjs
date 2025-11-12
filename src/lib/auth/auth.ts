@@ -1,13 +1,54 @@
 import NextAuth from "next-auth"
 import { PrismaAdapter } from "@auth/prisma-adapter"
-import Resend from "next-auth/providers/resend"
-
+import Credentials from "next-auth/providers/credentials"
 import { prisma } from "@/lib/prisma"
+import { signInSchema } from "./zod"
+import { ZodError } from "zod"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: {
-    strategy: "database",
+    strategy: "jwt",
   },
-  providers: [Resend],
-})
+  providers: [
+    Credentials({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      authorize: async (credentials) => {
+        try {
+          const { email, password } = signInSchema.parse({
+            email: credentials?.email,
+            password: credentials?.password,
+          })
+
+          const user = await prisma.user.findUnique({
+            where: { email },
+          })
+
+          if (!user || !user.password) {
+            throw new Error("Invalid credentials")
+          }
+
+          if (user.password !== password) {
+            throw new Error("Invalid credentials")
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name ?? undefined,
+          }
+        } catch (error) {
+          if (error instanceof ZodError) {
+            throw new Error(error.message)
+          }
+
+          throw new Error("Invalid credentials")
+        }
+      },
+    }),
+  ],
+});
