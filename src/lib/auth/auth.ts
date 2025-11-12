@@ -1,6 +1,7 @@
 import NextAuth from "next-auth"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import Credentials from "next-auth/providers/credentials"
+import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { signInSchema } from "./zod"
 import { ZodError } from "zod"
@@ -32,7 +33,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             throw new Error("Invalid credentials")
           }
 
-          if (user.password !== password) {
+          const isValidPassword = await bcrypt.compare(password, user.password)
+
+          if (!isValidPassword) {
             throw new Error("Invalid credentials")
           }
 

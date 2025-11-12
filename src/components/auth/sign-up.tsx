@@ -181,6 +181,9 @@ export default function SignUpForm() {
               aria-describedby={errors.password ? "password-error" : undefined}
               required
             />
+            <p className="text-xs text-muted-foreground">
+              8-32 caractères, avec au moins une majuscule, une minuscule, un chiffre et un caractère spécial.
+            </p>
             {errors.password && (
               <p id="password-error" className="text-sm text-destructive">
                 {errors.password}
