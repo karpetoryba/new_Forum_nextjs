@@ -43,3 +43,18 @@ model Message {
 
   @@map("message")
 }
+model User {
+  id String @id @default(cuid())
+  email String @unique
+  password String
+  name String?
+  avatar String?
+  bio String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+  archivedAt DateTime?
+
+  @@map("user")
+}

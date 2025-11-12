@@ -1,7 +1,3 @@
-interface FetchMessagesParams {
-  conversationId?: string;
-
-}
 export async function fetchMessages(params?: { conversationId?: string }) {
   const queryParams = new URLSearchParams();
   if (params?.conversationId) {
