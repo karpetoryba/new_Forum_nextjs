@@ -8,4 +8,12 @@ export const signInSchema = object({
     .min(1, "Password is required")
     .min(8, "Password must be more than 8 characters")
     .max(32, "Password must be less than 32 characters"),
-})
+});
+
+export const createUserSchema = signInSchema.extend({
+  name: string({ message: "Name must be a string" })
+    .trim()
+    .min(1, "Name must be at least 1 character")
+    .max(50, "Name must be at most 50 characters")
+    .optional(),
+});
