@@ -20,6 +20,16 @@ export async function GET(request: NextRequest) {
   }
 
   const messages = await prisma.message.findMany({
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          avatar: true,
+        },
+      },
+    },
     orderBy: {
       createdAt: "desc",
     },
@@ -69,60 +79,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Failed to create message" }, { status: 500 });
   }
 
-}
-
-export async function DELETE(request: NextRequest) {
-  try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // get id from query params
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
-
-    if (!id) {
-      return NextResponse.json(
-        { error: "Message ID is required" },
-        { status: 400 }
-      );
-    }
-
-    // verifier si le message existe
-    const message = await prisma.message.findUnique({
-      where: { id },
-    });
-
-    if (!message) {
-      return NextResponse.json(
-        { error: "Message not found" },
-        { status: 404 }
-      );
-    }
-
-    if (message.userId !== session.user.id) {
-      return NextResponse.json(
-        { error: "Forbidden" },
-        { status: 403 }
-      );
-    }
-
-    // Soft delete (mettre à jour deletedAt au lieu de supprimer physiquement)
-    const deletedMessage = await prisma.message.update({
-      where: { id },
-      data: {
-        deletedAt: new Date(),
-      },
-    });
-
-    return NextResponse.json(deletedMessage);
-  } catch (error) {
-    console.error("Error deleting message:", error);
-    return NextResponse.json(
-      { error: "Failed to delete message" },
-      { status: 500 }
-    );
-  }
 }
