@@ -34,11 +34,11 @@ export default function ConversationCard({
       return await ConversationService.archiveConversation(id);
     },
     onSuccess: () => {
-      toast.success("Conversation archivée avec succès");
+      toast.success("Conversation archived successfully");
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
     },
     onError: () => {
-      toast.error("Erreur lors de l'archivage de la conversation");
+      toast.error("Error archiving conversation");
     },
   });
 
@@ -47,11 +47,11 @@ export default function ConversationCard({
       return await ConversationService.deleteConversation(id);
     },
     onSuccess: () => {
-      toast.success("Conversation supprimée avec succès");
+      toast.success("Conversation deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
     },
     onError: () => {
-      toast.error("Erreur lors de la suppression de la conversation");
+      toast.error("Error deleting conversation");
     },
   });
 
@@ -60,12 +60,12 @@ export default function ConversationCard({
       return await ConversationService.updateConversation(conversation.id, data);
     },
     onSuccess: () => {
-      toast.success("Conversation modifiée avec succès");
+      toast.success("Conversation updated successfully");
       setIsEditing(false);
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
     },
     onError: () => {
-      toast.error("Erreur lors de la modification de la conversation");
+      toast.error("Error updating conversation");
     },
   });
 
@@ -78,7 +78,7 @@ export default function ConversationCard({
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (confirm("Êtes-vous sûr de vouloir supprimer cette conversation ?")) {
+    if (confirm("Are you sure you want to delete this conversation?")) {
       deleteMutation.mutate(conversation.id);
     }
   };
@@ -112,17 +112,17 @@ export default function ConversationCard({
     }
   };
 
-  // Генерируем изображение на основе ID если нет image
+  // Generate image based on ID if no image
   const imageUrl = useMemo(() => {
     if ((conversation as any).image) {
       return (conversation as any).image;
     }
-    // Используем placeholder изображение с уникальным seed на основе ID
+    // Use placeholder image with unique seed based on ID
     const seed = conversation.id.slice(-6);
     return `https://picsum.photos/seed/${seed}/400/250`;
   }, [conversation.id]);
 
-  // Генерируем градиент на основе ID если не используем placeholder
+  // Generate gradient based on ID if not using placeholder
   const gradientColors = useMemo(() => {
     const colors = [
       "from-blue-500/20 to-purple-500/20",
@@ -137,7 +137,7 @@ export default function ConversationCard({
 
   const CardContent = (
     <Card className={`${!isEditing ? "cursor-pointer" : ""} hover:shadow-lg transition-all group relative overflow-hidden h-full`}>
-        {/* Изображение */}
+        {/* Image */}
         <div className="relative h-48 w-full overflow-hidden">
           {(conversation as any).image ? (
             <Image
@@ -161,10 +161,10 @@ export default function ConversationCard({
               </div>
             </>
           )}
-          {/* Градиентный overlay для лучшей читаемости текста */}
+          {/* Gradient overlay for better text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
           
-          {/* Boutons d'action */}
+          {/* Action buttons */}
           {isOwner && (
             <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               {!isEditing ? (
@@ -174,7 +174,7 @@ export default function ConversationCard({
                     size="icon"
                     className="bg-background/80 hover:bg-background"
                     onClick={handleEdit}
-                    title="Modifier la conversation"
+                    title="Edit conversation"
                   >
                     <Edit2 className="h-4 w-4" />
                   </Button>
@@ -184,7 +184,7 @@ export default function ConversationCard({
                     className="bg-background/80 hover:bg-background"
                     onClick={handleArchive}
                     disabled={archiveMutation.isPending}
-                    title="Archiver la conversation"
+                    title="Archive conversation"
                   >
                     <Archive className="h-4 w-4" />
                   </Button>
@@ -194,7 +194,7 @@ export default function ConversationCard({
                     className="bg-background/80 hover:bg-background text-destructive hover:text-destructive"
                     onClick={handleDelete}
                     disabled={deleteMutation.isPending}
-                    title="Supprimer la conversation"
+                    title="Delete conversation"
                   >
                     <Trash className="h-4 w-4" />
                   </Button>
@@ -207,7 +207,7 @@ export default function ConversationCard({
                     className="bg-background/80 hover:bg-background"
                     onClick={handleSave}
                     disabled={updateMutation.isPending || !editTitle.trim()}
-                    title="Enregistrer"
+                    title="Save"
                   >
                     <Check className="h-4 w-4" />
                   </Button>
@@ -217,7 +217,7 @@ export default function ConversationCard({
                     className="bg-background/80 hover:bg-background"
                     onClick={handleCancel}
                     disabled={updateMutation.isPending}
-                    title="Annuler"
+                    title="Cancel"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -233,7 +233,7 @@ export default function ConversationCard({
               <Input
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
-                placeholder="Titre de la conversation"
+                placeholder="Conversation title"
                 className="w-full"
                 disabled={updateMutation.isPending}
                 onClick={(e) => e.stopPropagation()}
@@ -250,7 +250,7 @@ export default function ConversationCard({
               <Input
                 value={editImage}
                 onChange={(e) => setEditImage(e.target.value)}
-                placeholder="URL de l'image (optionnel)"
+                placeholder="Image URL (optional)"
                 type="url"
                 className="w-full"
                 disabled={updateMutation.isPending}
@@ -259,7 +259,7 @@ export default function ConversationCard({
             </div>
           ) : (
             <h3 className="font-semibold text-lg line-clamp-2 min-h-[3.5rem]">
-              {conversation.title || "Conversation sans titre"}
+              {conversation.title || "Untitled conversation"}
             </h3>
           )}
         </CardHeader>

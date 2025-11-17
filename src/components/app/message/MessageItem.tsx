@@ -1,7 +1,7 @@
 import { Message } from "@/generated/prisma";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
-import { fr } from "date-fns/locale/fr";
+import { enUS } from "date-fns/locale/en-US";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import MessageService from "@/services/message.service";
@@ -31,7 +31,7 @@ export default function MessageItem({ message, currentUserId }: MessageItemProps
   const [editContent, setEditContent] = useState(message.content);
   const isOwner = message.userId === currentUserId;
 
-  // Mettre à jour editContent si le message change
+  // Update editContent if message changes
   useEffect(() => {
     if (!isEditing) {
       setEditContent(message.content);
@@ -41,23 +41,23 @@ export default function MessageItem({ message, currentUserId }: MessageItemProps
   const formattedDate = message.createdAt 
     ? formatDistanceToNow(new Date(message.createdAt), { 
         addSuffix: true,
-        locale: fr 
+        locale: enUS 
       })
     : "";
   
-  // Utiliser l'avatar de l'utilisateur s'il existe, sinon générer un avatar basé sur l'email ou le nom
+  // Use user avatar if exists, otherwise generate avatar based on email or name
   const avatarUrl = useMemo(() => {
     if (message.user?.avatar) {
       return message.user.avatar;
     }
-    // Générer un avatar unique basé sur l'email ou le nom de l'utilisateur
+    // Generate unique avatar based on user email or name
     const seed = message.user?.email || message.user?.name || message.id || Math.random().toString();
     return `https://api.dicebear.com/7.x/personas/svg?seed=${seed}`;
   }, [message.user?.avatar, message.user?.email, message.user?.name, message.id]);
 
-  // Obtenir le nom d'affichage de l'auteur
+  // Get author display name
   const authorName = useMemo(() => {
-    return message.user?.name || message.user?.email || "Utilisateur anonyme";
+    return message.user?.name || message.user?.email || "Anonymous user";
   }, [message.user?.name, message.user?.email]);
 
   const deleteMutation = useMutation({
@@ -66,11 +66,11 @@ export default function MessageItem({ message, currentUserId }: MessageItemProps
       return await MessageService.deleteMessage(id);
     },
     onSuccess: () => {
-      toast.success("Message supprimé avec succès");
+      toast.success("Message deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["messages", message.conversationId] });
     },
     onError: () => {
-      toast.error("Erreur lors de la suppression du message");
+      toast.error("Error deleting message");
     },
   });
 
@@ -80,12 +80,12 @@ export default function MessageItem({ message, currentUserId }: MessageItemProps
       return await MessageService.updateMessage(message.id, content);
     },
     onSuccess: () => {
-      toast.success("Message modifié avec succès");
+      toast.success("Message updated successfully");
       setIsEditing(false);
       queryClient.invalidateQueries({ queryKey: ["messages", message.conversationId] });
     },
     onError: () => {
-      toast.error("Erreur lors de la modification du message");
+      toast.error("Error updating message");
     },
   });
 
@@ -111,7 +111,7 @@ export default function MessageItem({ message, currentUserId }: MessageItemProps
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="pt-6">
         <div className="flex gap-4">
-          {/* Avatar de l'utilisateur */}
+          {/* User avatar */}
           <div className="flex-shrink-0">
             <div className="relative w-10 h-10 rounded-full overflow-hidden bg-muted">
               <Image
@@ -125,7 +125,7 @@ export default function MessageItem({ message, currentUserId }: MessageItemProps
             </div>
           </div>
 
-          {/* Contenu du message */}
+          {/* Message content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <p className="text-sm font-semibold text-foreground">
@@ -156,7 +156,7 @@ export default function MessageItem({ message, currentUserId }: MessageItemProps
                     className="h-7"
                   >
                     <Check className="h-3 w-3 mr-1" />
-                    Enregistrer
+                    Save
                   </Button>
                   <Button
                     variant="ghost"
@@ -166,7 +166,7 @@ export default function MessageItem({ message, currentUserId }: MessageItemProps
                     className="h-7"
                   >
                     <X className="h-3 w-3 mr-1" />
-                    Annuler
+                    Cancel
                   </Button>
                 </div>
               </div>
@@ -182,12 +182,12 @@ export default function MessageItem({ message, currentUserId }: MessageItemProps
             )}
           </div>
 
-          {/* Boutons d'action */}
+          {/* Action buttons */}
           {isOwner && !isEditing && (
             <div className="flex-shrink-0 flex gap-1">
               <Button 
                 variant="ghost"  
-                title="Modifier le message" 
+                title="Edit message" 
                 size="icon" 
                 onClick={handleEdit}
               >
@@ -195,7 +195,7 @@ export default function MessageItem({ message, currentUserId }: MessageItemProps
               </Button>
               <Button 
                 variant="ghost"  
-                title="Supprimer le message" 
+                title="Delete message" 
                 size="icon" 
                 onClick={() => deleteMutation.mutate(message.id)}
                 disabled={deleteMutation.isPending}
