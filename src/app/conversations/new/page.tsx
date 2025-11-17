@@ -2,8 +2,15 @@ import ConversationForm from "@/components/app/conversation/ConversationForm";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { auth } from "@/lib/auth/auth";
+import { redirect } from "next/navigation";
 
-export default function NewConversationPage() {
+export default async function NewConversationPage() {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    redirect("/signin?callbackUrl=/conversations/new");
+  }
   return (
     <div className="min-h-screen">
       {/* Hero Section */}

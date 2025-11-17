@@ -2,26 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-
-  const conversation = await prisma.conversation.findUnique({
-    where: { id },
-  });
-
-  if (!conversation) {
-    return NextResponse.json(
-      { error: "Conversation not found" },
-      { status: 404 }
-    );
-  }
-
-  return NextResponse.json(conversation);
-}
-
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -34,47 +14,48 @@ export async function PATCH(
     }
 
     const { id } = await params;
-    const { title, image } = await request.json();
+    const { content } = await request.json();
 
-    // Vérifier si la conversation existe
-    const conversation = await prisma.conversation.findUnique({
+    if (!content) {
+      return NextResponse.json(
+        { error: "Content is required" },
+        { status: 400 }
+      );
+    }
+
+    // Vérifier si le message existe
+    const message = await prisma.message.findUnique({
       where: { id },
     });
 
-    if (!conversation) {
+    if (!message) {
       return NextResponse.json(
-        { error: "Conversation not found" },
+        { error: "Message not found" },
         { status: 404 }
       );
     }
 
     // Vérifier ownership
-    if (conversation.userId !== session.user.id) {
+    if (message.userId !== session.user.id) {
       return NextResponse.json(
         { error: "Forbidden" },
         { status: 403 }
       );
     }
 
-    // Mettre à jour la conversation
-    const data: any = {};
-    if (title !== undefined) {
-      data.title = title;
-    }
-    if (image !== undefined) {
-      data.image = image;
-    }
-
-    const updatedConversation = await prisma.conversation.update({
+    // Mettre à jour le message
+    const updatedMessage = await prisma.message.update({
       where: { id },
-      data,
+      data: {
+        content,
+      },
     });
 
-    return NextResponse.json(updatedConversation);
+    return NextResponse.json(updatedMessage);
   } catch (error) {
-    console.error("Error updating conversation:", error);
+    console.error("Error updating message:", error);
     return NextResponse.json(
-      { error: "Failed to update conversation" },
+      { error: "Failed to update message" },
       { status: 500 }
     );
   }
@@ -93,20 +74,20 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Vérifier si la conversation existe
-    const conversation = await prisma.conversation.findUnique({
+    // Vérifier si le message existe
+    const message = await prisma.message.findUnique({
       where: { id },
     });
 
-    if (!conversation) {
+    if (!message) {
       return NextResponse.json(
-        { error: "Conversation not found" },
+        { error: "Message not found" },
         { status: 404 }
       );
     }
 
     // Vérifier ownership
-    if (conversation.userId !== session.user.id) {
+    if (message.userId !== session.user.id) {
       return NextResponse.json(
         { error: "Forbidden" },
         { status: 403 }
@@ -114,18 +95,18 @@ export async function DELETE(
     }
 
     // Soft delete (mettre à jour deletedAt au lieu de supprimer physiquement)
-    const deletedConversation = await prisma.conversation.update({
+    const deletedMessage = await prisma.message.update({
       where: { id },
       data: {
         deletedAt: new Date(),
       },
     });
 
-    return NextResponse.json(deletedConversation);
+    return NextResponse.json(deletedMessage);
   } catch (error) {
-    console.error("Error deleting conversation:", error);
+    console.error("Error deleting message:", error);
     return NextResponse.json(
-      { error: "Failed to delete conversation" },
+      { error: "Failed to delete message" },
       { status: 500 }
     );
   }

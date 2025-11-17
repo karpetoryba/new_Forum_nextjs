@@ -40,11 +40,37 @@ async function createConversation(data: { title: string; image?: string }) {
   return response.json();
 }
 
+async function updateConversation(id: string, data: { title?: string; image?: string }) {
+  const response = await fetch(`/api/conversations/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to update conversation");
+  }
+  return response.json();
+}
+
+async function deleteConversation(id: string) {
+  const response = await fetch(`/api/conversations/${id}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to delete conversation");
+  }
+  return response.json();
+}
+
 const ConversationService = {
   fetchConversations,
   fetchConversationById,
   archiveConversation,
   createConversation,
+  updateConversation,
+  deleteConversation,
 };
 
 export default ConversationService;
