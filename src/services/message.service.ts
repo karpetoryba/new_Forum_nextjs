@@ -27,8 +27,22 @@ async function createMessage(content: string, conversationId: string) {
   return response.json();
 }
 
+async function updateMessage(id: string, content: string) {
+  const response = await fetch(`/api/messages/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ content }),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to update message");
+  }
+  return response.json();
+}
+
 async function deleteMessage(id: string) {
-  const response = await fetch(`/api/messages?id=${id}`, {
+  const response = await fetch(`/api/messages/${id}`, {
     method: "DELETE",
   });
   if (!response.ok) {
@@ -40,6 +54,7 @@ async function deleteMessage(id: string) {
 const MessageService = {
   fetchMessages,
   createMessage,
+  updateMessage,
   deleteMessage,
 };
 

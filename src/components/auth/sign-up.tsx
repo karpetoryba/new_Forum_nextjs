@@ -3,6 +3,7 @@
 import { type ChangeEvent, type FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -99,10 +100,24 @@ export default function SignUpForm() {
         return;
       }
 
-      toast.success("Compte créé avec succès", {
-        description: "Vous pouvez maintenant vous connecter.",
+      const signInResult = await signIn("credentials", {
+        email: parsed.data.email,
+        password: parsed.data.password,
+        redirect: false,
       });
-      router.push("/signin");
+
+      if (signInResult?.error) {
+        toast.success("Compte créé avec succès", {
+          description: "Vous pouvez maintenant vous connecter.",
+        });
+        router.push("/signin");
+        return;
+      }
+
+      toast.success("Inscription réussie", {
+        description: "Vous êtes maintenant connecté.",
+      });
+      router.replace("/");
     } catch (error) {
       console.error("[SignUpForm]", error);
       toast.error("Une erreur est survenue");

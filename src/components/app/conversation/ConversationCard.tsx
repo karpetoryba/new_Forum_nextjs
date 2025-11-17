@@ -5,32 +5,67 @@ import { Button } from "@/components/ui/button";
 import { getRelativeTime } from "@/lib/date";
 import { ConversationWithExtend } from "@/types/conversation.type";
 import Link from "next/link";
-import { Archive, MessageSquare } from "lucide-react";
+import { Archive, MessageSquare, Edit2, Trash } from "lucide-react";
 import ConversationService from "@/services/conversation.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import Image from "next/image";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Check, X } from "lucide-react";
 
 interface ConversationCardProps {
   conversation: ConversationWithExtend;
+  currentUserId?: string;
 }
 
 export default function ConversationCard({
   conversation,
+  currentUserId,
 }: ConversationCardProps) {
   const queryClient = useQueryClient();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(conversation.title || "");
+  const [editImage, setEditImage] = useState((conversation as any).image || "");
+  const isOwner = conversation.userId === currentUserId;
 
   const archiveMutation = useMutation({
     mutationFn: async (id: string) => {
       return await ConversationService.archiveConversation(id);
     },
     onSuccess: () => {
-      toast.success("Conversation archivée avec succès");
+      toast.success("Conversation archived successfully");
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
     },
     onError: () => {
-      toast.error("Erreur lors de l'archivage de la conversation");
+      toast.error("Error archiving conversation");
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await ConversationService.deleteConversation(id);
+    },
+    onSuccess: () => {
+      toast.success("Conversation deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    },
+    onError: () => {
+      toast.error("Error deleting conversation");
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: { title?: string; image?: string }) => {
+      return await ConversationService.updateConversation(conversation.id, data);
+    },
+    onSuccess: () => {
+      toast.success("Conversation updated successfully");
+      setIsEditing(false);
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    },
+    onError: () => {
+      toast.error("Error updating conversation");
     },
   });
 
@@ -40,17 +75,54 @@ export default function ConversationCard({
     archiveMutation.mutate(conversation.id);
   };
 
-  // Генерируем изображение на основе ID если нет image
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (confirm("Are you sure you want to delete this conversation?")) {
+      deleteMutation.mutate(conversation.id);
+    }
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setEditTitle(conversation.title || "");
+    setEditImage((conversation as any).image || "");
+    setIsEditing(true);
+  };
+
+  const handleCancel = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setEditTitle(conversation.title || "");
+    setEditImage((conversation as any).image || "");
+    setIsEditing(false);
+  };
+
+  const handleSave = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (editTitle.trim() && (editTitle !== conversation.title || editImage !== (conversation as any).image)) {
+      updateMutation.mutate({
+        title: editTitle.trim(),
+        image: editImage.trim() || undefined,
+      });
+    } else {
+      setIsEditing(false);
+    }
+  };
+
+  // Generate image based on ID if no image
   const imageUrl = useMemo(() => {
     if ((conversation as any).image) {
       return (conversation as any).image;
     }
-    // Используем placeholder изображение с уникальным seed на основе ID
+    // Use placeholder image with unique seed based on ID
     const seed = conversation.id.slice(-6);
     return `https://picsum.photos/seed/${seed}/400/250`;
   }, [conversation.id]);
 
-  // Генерируем градиент на основе ID если не используем placeholder
+  // Generate gradient based on ID if not using placeholder
   const gradientColors = useMemo(() => {
     const colors = [
       "from-blue-500/20 to-purple-500/20",
@@ -63,10 +135,9 @@ export default function ConversationCard({
     return colors[index];
   }, [conversation.id]);
 
-  return (
-    <Link href={`/conversations/${conversation.id}`}>
-      <Card className="cursor-pointer hover:shadow-lg transition-all group relative overflow-hidden h-full">
-        {/* Изображение */}
+  const CardContent = (
+    <Card className={`${!isEditing ? "cursor-pointer" : ""} hover:shadow-lg transition-all group relative overflow-hidden h-full`}>
+        {/* Image */}
         <div className="relative h-48 w-full overflow-hidden">
           {(conversation as any).image ? (
             <Image
@@ -90,26 +161,107 @@ export default function ConversationCard({
               </div>
             </>
           )}
-          {/* Градиентный overlay для лучшей читаемости текста */}
+          {/* Gradient overlay for better text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
           
-          {/* Кнопка архивации */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 hover:bg-background"
-            onClick={handleArchive}
-            disabled={archiveMutation.isPending}
-            title="Archiver la conversation"
-          >
-            <Archive className="h-4 w-4" />
-          </Button>
+          {/* Action buttons */}
+          {isOwner && (
+            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              {!isEditing ? (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="bg-background/80 hover:bg-background"
+                    onClick={handleEdit}
+                    title="Edit conversation"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="bg-background/80 hover:bg-background"
+                    onClick={handleArchive}
+                    disabled={archiveMutation.isPending}
+                    title="Archive conversation"
+                  >
+                    <Archive className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="bg-background/80 hover:bg-background text-destructive hover:text-destructive"
+                    onClick={handleDelete}
+                    disabled={deleteMutation.isPending}
+                    title="Delete conversation"
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="bg-background/80 hover:bg-background"
+                    onClick={handleSave}
+                    disabled={updateMutation.isPending || !editTitle.trim()}
+                    title="Save"
+                  >
+                    <Check className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="bg-background/80 hover:bg-background"
+                    onClick={handleCancel}
+                    disabled={updateMutation.isPending}
+                    title="Cancel"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         <CardHeader className="pb-2">
-          <h3 className="font-semibold text-lg line-clamp-2 min-h-[3.5rem]">
-            {conversation.title || "Conversation sans titre"}
-          </h3>
+          {isEditing ? (
+            <div className="space-y-2">
+              <Input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Conversation title"
+                className="w-full"
+                disabled={updateMutation.isPending}
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && e.ctrlKey) {
+                    e.preventDefault();
+                    handleSave(e as any);
+                  } else if (e.key === "Escape") {
+                    e.preventDefault();
+                    handleCancel(e as any);
+                  }
+                }}
+              />
+              <Input
+                value={editImage}
+                onChange={(e) => setEditImage(e.target.value)}
+                placeholder="Image URL (optional)"
+                type="url"
+                className="w-full"
+                disabled={updateMutation.isPending}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          ) : (
+            <h3 className="font-semibold text-lg line-clamp-2 min-h-[3.5rem]">
+              {conversation.title || "Untitled conversation"}
+            </h3>
+          )}
         </CardHeader>
 
         <CardFooter className="w-full flex justify-between items-center pt-2">
@@ -126,6 +278,15 @@ export default function ConversationCard({
           </div>
         </CardFooter>
       </Card>
+  );
+
+  if (isEditing) {
+    return CardContent;
+  }
+
+  return (
+    <Link href={`/conversations/${conversation.id}`}>
+      {CardContent}
     </Link>
   );
 }
