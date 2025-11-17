@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -34,6 +35,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { title, image } = await request.json();
     
     const data: any = {};
@@ -43,6 +50,7 @@ export async function POST(request: NextRequest) {
     if (image) {
       data.image = image;
     }
+    data.userId = session.user.id;
     
     const newConversation = await prisma.conversation.create({
       data,

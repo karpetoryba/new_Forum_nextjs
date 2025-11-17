@@ -14,10 +14,12 @@ import { useMemo } from "react";
 
 interface ConversationCardProps {
   conversation: ConversationWithExtend;
+  currentUserId?: string;
 }
 
 export default function ConversationCard({
   conversation,
+  currentUserId,
 }: ConversationCardProps) {
   const queryClient = useQueryClient();
 
@@ -94,16 +96,18 @@ export default function ConversationCard({
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
           
           {/* Кнопка архивации */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 hover:bg-background"
-            onClick={handleArchive}
-            disabled={archiveMutation.isPending}
-            title="Archiver la conversation"
-          >
-            <Archive className="h-4 w-4" />
-          </Button>
+          {conversation.userId === currentUserId && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 hover:bg-background"
+              onClick={handleArchive}
+              disabled={archiveMutation.isPending}
+              title="Archiver la conversation"
+            >
+              <Archive className="h-4 w-4" />
+            </Button>
+          )}
         </div>
 
         <CardHeader className="pb-2">

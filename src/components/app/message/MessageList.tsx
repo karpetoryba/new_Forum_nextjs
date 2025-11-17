@@ -2,41 +2,38 @@
 import { Message } from "@/generated/prisma";
 //on affiche la liste des messages d'une conversation
 import MessageService from "@/services/message.service";
-import { useEffect, useState } from "react";
 import MessageItem from "./MessageItem";
 import MessageForm from "./MessageForm";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 interface MessageListProps {
   conversationId?: string;
 }
 export default function MessageList({ conversationId }: MessageListProps) {
- //param 
- //state pour les messages
-const { data: messages, isLoading, isError } = useQuery({
-  queryKey: ["messages", conversationId],
-  queryFn: async () => {
-    // Задержка для тестирования скелетона (удалить после тестирования)
-    await new Promise((resolve) => setTimeout(resolve, 2000)); // 2 секунды задержки
-    return await MessageService.fetchMessages({ conversationId });
-  },
-});
- 
+  const { data: session, status } = useSession();
+  const isSessionLoading = status === "loading";
+  const isAuthenticated = Boolean(session?.user);
 
+  const { data: messages, isLoading, isError } = useQuery({
+    queryKey: ["messages", conversationId],
+    queryFn: async () => {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      return await MessageService.fetchMessages({ conversationId });
+    },
+  });
 
+  const createMessage = async (content: string) => {
+    if (!conversationId) return;
 
-const createMessage = async (content: string) => {
-  if (!conversationId) return;
-  
-  try {
-    const data = await MessageService.createMessage(content, conversationId);
-    console.log("create data", data);
-
-  } 
-  catch (error) {
-    console.error("Error creating message:", error);
-  }
-};
+    try {
+      await MessageService.createMessage(content, conversationId);
+    } catch (error) {
+      console.error("Error creating message:", error);
+    }
+  };
 if (isLoading) {
   return (
     <div className="flex flex-col h-full">
@@ -69,13 +66,39 @@ if (isError) {
         ) : (
           <div className="flex flex-col gap-4">
             {messages?.map((message: Message) => (
-              <MessageItem key={message.id} message={message} />
+              <MessageItem
+                key={message.id}
+                message={message}
+                currentUserId={session?.user?.id}
+              />
             ))}
           </div>
         )}
       </div>
       <div className="pb-4">
-        <MessageForm conversationId={conversationId} onCreateMessage={createMessage}/>
+        {isSessionLoading ? (
+          <Skeleton className="h-24 w-full" />
+        ) : isAuthenticated ? (
+          <MessageForm
+            conversationId={conversationId}
+            onCreateMessage={createMessage}
+          />
+        ) : (
+          <div className="rounded-lg border border-dashed p-6 text-center">
+            <h3 className="font-medium">Connectez-vous pour répondre</h3>
+            <p className="text-sm text-muted-foreground mt-2">
+              Créez un compte ou connectez-vous pour participer à la conversation.
+            </p>
+            <div className="mt-4 flex justify-center gap-3">
+              <Button asChild variant="secondary">
+                <Link href="/signup">Créer un compte</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/signin">Se connecter</Link>
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

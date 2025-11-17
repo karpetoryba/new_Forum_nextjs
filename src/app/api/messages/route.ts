@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -29,11 +30,38 @@ export async function GET(request: NextRequest) {
 }
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { content, conversationId } = await request.json();
+
+    if (!content || !conversationId) {
+      return NextResponse.json(
+        { error: "Content and conversationId are required" },
+        { status: 400 }
+      );
+    }
+
+    const conversation = await prisma.conversation.findFirst({
+      where: { id: conversationId, deletedAt: null },
+      select: { id: true },
+    });
+
+    if (!conversation) {
+      return NextResponse.json(
+        { error: "Conversation not found" },
+        { status: 404 }
+      );
+    }
+
     const newMessage = await prisma.message.create({
       data: {
         content,
         conversationId,
+        userId: session.user.id,
       },
     });
     return NextResponse.json(newMessage);
@@ -45,6 +73,12 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     // get id from query params
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -65,6 +99,13 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json(
         { error: "Message not found" },
         { status: 404 }
+      );
+    }
+
+    if (message.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: "Forbidden" },
+        { status: 403 }
       );
     }
 

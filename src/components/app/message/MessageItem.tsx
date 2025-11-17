@@ -12,9 +12,10 @@ import { useMemo } from "react";
 
 interface MessageItemProps {
   message: Message;
+  currentUserId?: string;
 }
 
-export default function MessageItem({ message }: MessageItemProps) {
+export default function MessageItem({ message, currentUserId }: MessageItemProps) {
   const queryClient = useQueryClient();
   const formattedDate = message.createdAt 
     ? formatDistanceToNow(new Date(message.createdAt), { 
@@ -75,16 +76,18 @@ export default function MessageItem({ message }: MessageItemProps) {
           </div>
 
           {/* Bouton de suppression */}
-          <div className="flex-shrink-0">
-            <Button 
-              variant="ghost"  
-              title="Supprimer le message" 
-              size="icon" 
-              onClick={() => mutation.mutate(message.id)}
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
-          </div>
+          {message.userId === currentUserId && (
+            <div className="flex-shrink-0">
+              <Button 
+                variant="ghost"  
+                title="Supprimer le message" 
+                size="icon" 
+                onClick={() => mutation.mutate(message.id)}
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
