@@ -10,11 +10,11 @@ export async function GET(request: NextRequest) {
     deletedAt: null,
   };
 
-  // Если запрашиваем заархивированные, показываем только их
+  // If requesting archived, show only archived ones
   if (showArchived) {
     whereClause.archivedAt = { not: null };
   } else {
-    // Иначе показываем только активные (не заархивированные)
+    // Otherwise show only active (not archived) ones
     whereClause.archivedAt = null;
   }
 
