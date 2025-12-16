@@ -10,6 +10,16 @@ export async function GET(
 
   const conversation = await prisma.conversation.findUnique({
     where: { id },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          avatar: true,
+        },
+      },
+    },
   });
 
   if (!conversation) {

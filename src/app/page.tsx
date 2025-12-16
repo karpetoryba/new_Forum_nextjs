@@ -4,3 +4,4 @@ export default function Home() {
   //  Accueil
   redirect("/accueil");
 }
+  
