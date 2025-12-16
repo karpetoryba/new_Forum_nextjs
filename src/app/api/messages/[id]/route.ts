@@ -35,8 +35,11 @@ export async function PATCH(
       );
     }
 
-    // Vérifier ownership
-    if (message.userId !== session.user.id) {
+    // Vérifier ownership ou si l'utilisateur est modérateur/admin
+    const isOwner = message.userId === session.user.id;
+    const isModeratorOrAdmin = session.user.role === "MODERATOR" || session.user.role === "ADMIN";
+    
+    if (!isOwner && !isModeratorOrAdmin) {
       return NextResponse.json(
         { error: "Forbidden" },
         { status: 403 }
@@ -86,8 +89,11 @@ export async function DELETE(
       );
     }
 
-    // Vérifier ownership
-    if (message.userId !== session.user.id) {
+    // Vérifier ownership ou si l'utilisateur est modérateur/admin
+    const isOwner = message.userId === session.user.id;
+    const isModeratorOrAdmin = session.user.role === "MODERATOR" || session.user.role === "ADMIN";
+    
+    if (!isOwner && !isModeratorOrAdmin) {
       return NextResponse.json(
         { error: "Forbidden" },
         { status: 403 }

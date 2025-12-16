@@ -58,8 +58,11 @@ export async function PATCH(
       );
     }
 
-    // Vérifier ownership
-    if (conversation.userId !== session.user.id) {
+    // Vérifier ownership ou si l'utilisateur est modérateur/admin
+    const isOwner = conversation.userId === session.user.id;
+    const isModeratorOrAdmin = session.user.role === "MODERATOR" || session.user.role === "ADMIN";
+    
+    if (!isOwner && !isModeratorOrAdmin) {
       return NextResponse.json(
         { error: "Forbidden" },
         { status: 403 }
