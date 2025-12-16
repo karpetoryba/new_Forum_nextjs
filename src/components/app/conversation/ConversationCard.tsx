@@ -29,6 +29,11 @@ export default function ConversationCard({
   const [editImage, setEditImage] = useState((conversation as any).image || "");
   const isOwner = conversation.userId === currentUserId;
 
+  // Get author display name
+  const authorName = useMemo(() => {
+    return conversation.user?.name || conversation.user?.email || "Anonymous user";
+  }, [conversation.user?.name, conversation.user?.email]);
+
   const archiveMutation = useMutation({
     mutationFn: async (id: string) => {
       return await ConversationService.archiveConversation(id);
@@ -265,9 +270,14 @@ export default function ConversationCard({
         </CardHeader>
 
         <CardFooter className="w-full flex justify-between items-center pt-2">
-          <p className="text-xs text-muted-foreground">
-            {getRelativeTime(conversation.createdAt)}
-          </p>
+          <div className="flex flex-col gap-1">
+            <p className="text-xs text-muted-foreground">
+              {getRelativeTime(conversation.createdAt)}
+            </p>
+            <p className="text-xs font-medium text-foreground">
+              Par {authorName}
+            </p>
+          </div>
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <MessageSquare className="h-3 w-3" />
             <span>

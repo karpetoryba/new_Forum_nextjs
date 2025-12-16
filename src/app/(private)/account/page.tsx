@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import ProfileForm from "@/components/app/profile/ProfileForm";
 
 export default async function AccountPage() {
   const session = await auth();
@@ -114,6 +115,8 @@ export default async function AccountPage() {
           </CardContent>
         </Card>
       </div>
+
+      <ProfileForm />
 
       <Card>
         <CardHeader>

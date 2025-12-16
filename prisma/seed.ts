@@ -17,7 +17,7 @@ async function main() {
   // Créer des utilisateurs
   console.log("👥 Création des utilisateurs...");
   const users = [];
-  const defaultPassword = await bcrypt.hash("password123", 10);
+  const defaultPassword = await bcrypt.hash("Password123!", 10);
 
   // Créer quelques utilisateurs avec des emails prédéfinis pour tester
   const testUsers = [
@@ -27,6 +27,15 @@ async function main() {
       name: "Admin User",
       bio: faker.person.bio(),
       avatar: faker.image.avatar(),
+      role: "ADMIN" as const,
+    },
+    {
+      email: "moderator@example.com",
+      password: defaultPassword,
+      name: "Moderator User",
+      bio: faker.person.bio(),
+      avatar: faker.image.avatar(),
+      role: "MODERATOR" as const,
     },
     {
       email: "user@example.com",
@@ -34,6 +43,7 @@ async function main() {
       name: "Test User",
       bio: faker.person.bio(),
       avatar: faker.image.avatar(),
+      role: "USER" as const,
     },
   ];
 
@@ -132,8 +142,9 @@ async function main() {
   console.log(`   - ${conversations.length} conversations`);
   console.log(`   - ${messageCount} messages`);
   console.log("\n🔑 Identifiants de test:");
-  console.log("   - admin@example.com / password123");
-  console.log("   - user@example.com / password123");
+  console.log("   - admin@example.com / Password123! (ADMIN)");
+  console.log("   - moderator@example.com / Password123! (MODERATOR)");
+  console.log("   - user@example.com / Password123! (USER)");
 }
 
 main()
