@@ -38,11 +38,11 @@ export default function MessageForm({
         onSuccess: () => {
             toast.success("Message envoyé avec succès");
             reset();
-            // Инвалидируем кеш сообщений, чтобы обновить список
+            // Invalidate messages cache to refresh the list
             queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
-            // Вызываем callback, если он есть
+            // Call callback if provided
             if (onCreateMessage) {
-                // Callback может быть использован для других действий
+                // Callback can be used for other actions
             }
         },
         onError: () => {

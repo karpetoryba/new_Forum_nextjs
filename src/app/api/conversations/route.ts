@@ -5,16 +5,20 @@ import { auth } from "@/lib/auth/auth";
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const showArchived = searchParams.get("archived") === "true";
+  const userId = searchParams.get("userId");
 
   const whereClause: any = {
     deletedAt: null,
   };
+  if (userId) {
+    whereClause.userId = userId;
+  }
 
-  // Если запрашиваем заархивированные, показываем только их
+  // If requesting archived, show only archived ones
   if (showArchived) {
     whereClause.archivedAt = { not: null };
   } else {
-    // Иначе показываем только активные (не заархивированные)
+    // Otherwise show only active (not archived) ones
     whereClause.archivedAt = null;
   }
 
@@ -22,6 +26,14 @@ export async function GET(request: NextRequest) {
     include: {
       messages: {
         select: { id: true },
+      },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          avatar: true,
+        },
       },
     },
     orderBy: {
@@ -51,7 +63,8 @@ export async function POST(request: NextRequest) {
       data.image = image;
     }
     data.userId = session.user.id;
-    
+
+ 
     const newConversation = await prisma.conversation.create({
       data,
     });

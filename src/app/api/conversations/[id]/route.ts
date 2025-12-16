@@ -10,6 +10,16 @@ export async function GET(
 
   const conversation = await prisma.conversation.findUnique({
     where: { id },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          avatar: true,
+        },
+      },
+    },
   });
 
   if (!conversation) {
@@ -48,8 +58,11 @@ export async function PATCH(
       );
     }
 
-    // Vérifier ownership
-    if (conversation.userId !== session.user.id) {
+    // Vérifier ownership ou si l'utilisateur est modérateur/admin
+    const isOwner = conversation.userId === session.user.id;
+    const isModeratorOrAdmin = session.user.role === "MODERATOR" || session.user.role === "ADMIN";
+    
+    if (!isOwner && !isModeratorOrAdmin) {
       return NextResponse.json(
         { error: "Forbidden" },
         { status: 403 }

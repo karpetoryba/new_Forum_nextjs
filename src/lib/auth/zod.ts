@@ -24,3 +24,22 @@ export const createUserSchema = signInSchema.extend({
     .max(50, "Name must be at most 50 characters")
     .optional(),
 })
+
+export const updateProfileSchema = object({
+  name: string()
+    .trim()
+    .min(1, "Name must be at least 1 character")
+    .max(50, "Name must be at most 50 characters")
+    .optional(),
+  avatar: string()
+    .optional()
+    .refine(
+      (val) => !val || val === "" || /^https?:\/\/.+/.test(val),
+      "Avatar must be a valid URL"
+    )
+    .transform((val) => (val === "" ? undefined : val)),
+  bio: string()
+    .trim()
+    .max(500, "Bio must be at most 500 characters")
+    .optional(),
+}).partial()

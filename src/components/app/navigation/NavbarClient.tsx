@@ -132,7 +132,18 @@ export default function NavbarClient({ session }: NavbarClientProps) {
               {menuOpen && (
                 <div className="absolute right-0 mt-2 w-56 rounded-md border bg-popover p-2 shadow-lg">
                   <div className="border-b pb-2">
-                    <p className="text-sm font-medium text-foreground">{displayName}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-foreground">{displayName}</p>
+                      {session?.user?.role && session.user.role !== "USER" && (
+                        <span className={`text-xs px-1.5 py-0.5 rounded ${
+                          session.user.role === "ADMIN" 
+                            ? "bg-red-500/10 text-red-700 dark:text-red-400" 
+                            : "bg-blue-500/10 text-blue-700 dark:text-blue-400"
+                        }`}>
+                          {session.user.role === "ADMIN" ? "Admin" : "Mod"}
+                        </span>
+                      )}
+                    </div>
                     {session?.user?.email && (
                       <p className="text-xs text-muted-foreground">{session.user.email}</p>
                     )}

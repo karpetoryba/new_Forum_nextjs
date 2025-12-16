@@ -10,23 +10,23 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface ConversationCarouselProps {
-  autoScrollInterval?: number; // Интервал автопрокрутки в миллисекундах
+  autoScrollInterval?: number; 
 }
 
 export default function ConversationCarousel({
-  autoScrollInterval = 4000, // По умолчанию 4 секунды
+  autoScrollInterval = 4000, 
 }: ConversationCarouselProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
 
   const { data: conversations, isLoading } = useQuery({
-    queryKey: ["conversations", false], // Только активные conversations
+    queryKey: ["conversations", false],
     queryFn: async () => {
       return await ConversationService.fetchConversations(false);
     },
   });
 
-  // Автопрокрутка карусели
+ 
   useEffect(() => {
     if (!conversations || conversations.length === 0 || isPaused) return;
 
@@ -38,7 +38,7 @@ export default function ConversationCarousel({
       const clientWidth = container.clientWidth;
       const currentScroll = container.scrollLeft;
 
-      // Если дошли до конца, возвращаемся в начало
+    
       if (currentScroll + clientWidth >= scrollWidth - 10) {
         container.scrollTo({ left: 0, behavior: "smooth" });
       } else {
@@ -56,7 +56,7 @@ export default function ConversationCarousel({
     if (container) {
       container.scrollBy({ left: -container.clientWidth, behavior: "smooth" });
       setIsPaused(true);
-      // Возобновляем автоскролл через 10 секунд после ручного управления
+     
       setTimeout(() => setIsPaused(false), 10000);
     }
   };
@@ -66,7 +66,7 @@ export default function ConversationCarousel({
     if (container) {
       container.scrollBy({ left: container.clientWidth, behavior: "smooth" });
       setIsPaused(true);
-      // Возобновляем автоскролл через 10 секунд после ручного управления
+      // Resume auto-scroll after 10 seconds of manual control
       setTimeout(() => setIsPaused(false), 10000);
     }
   };
@@ -93,7 +93,7 @@ export default function ConversationCarousel({
 
   return (
     <div className="container mx-auto py-8 relative group">
-      {/* Кнопка влево */}
+      {/* Left button */}
       <Button
         variant="outline"
         size="icon"
@@ -107,7 +107,7 @@ export default function ConversationCarousel({
         <ChevronLeft className="h-4 w-4" />
       </Button>
 
-      {/* Контейнер карусели */}
+      {/* Carousel container */}
       <div
         ref={scrollContainerRef}
         className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory hide-scrollbar"
@@ -127,7 +127,7 @@ export default function ConversationCarousel({
         ))}
       </div>
 
-      {/* Кнопка вправо */}
+      {/* Right button */}
       <Button
         variant="outline"
         size="icon"
