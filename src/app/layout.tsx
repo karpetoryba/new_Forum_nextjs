@@ -6,6 +6,7 @@ import ReactQueryProvider from "./providers/ReactQueryProvider";
 import AuthProvider from "./providers/AuthProvider";
 import Navbar from "@/components/app/navigation/Navbar";
 import Footer from "@/components/app/navigation/Footer";
+import ThemeProvider from "./providers/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,18 +29,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className="dark">
+    <html lang="fr" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
-        <AuthProvider>
-          <ReactQueryProvider>
-            <Toaster />
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </ReactQueryProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <ReactQueryProvider>
+              <Toaster />
+              <Navbar />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </ReactQueryProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

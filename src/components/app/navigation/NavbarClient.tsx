@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import ThemeToggle from "@/components/app/ThemeToggle";
 
 type NavbarClientProps = {
   session: Session | null;
@@ -112,6 +113,8 @@ export default function NavbarClient({ session }: NavbarClientProps) {
               );
             })}
           </div>
+
+          <ThemeToggle />
 
           {!isAuthenticated ? (
             <div className="flex items-center gap-2">
