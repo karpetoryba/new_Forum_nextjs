@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import ProfileForm from "@/components/app/profile/ProfileForm";
+import SubscriptionCard from "@/components/app/subscription/SubscriptionCard";
 
 export default async function AccountPage() {
   const session = await auth();
@@ -23,7 +24,7 @@ export default async function AccountPage() {
 
   const userId = session.user.id;
 
-  const [conversationCount, messageCount, recentConversations] = await Promise.all([
+  const [conversationCount, messageCount, recentConversations, subscription] = await Promise.all([
     prisma.conversation.count({
       where: { userId, deletedAt: null },
     }),
@@ -39,6 +40,16 @@ export default async function AccountPage() {
         title: true,
         createdAt: true,
         archivedAt: true,
+      },
+    }),
+    prisma.subscription.findUnique({
+      where: { userId },
+      select: {
+        plan: true,
+        status: true,
+        billingInterval: true,
+        stripeCurrentPeriodEnd: true,
+        canceledAt: true,
       },
     }),
   ]);
@@ -115,6 +126,18 @@ export default async function AccountPage() {
           </CardContent>
         </Card>
       </div>
+
+      <SubscriptionCard
+        subscription={
+          subscription
+            ? {
+                ...subscription,
+                stripeCurrentPeriodEnd: subscription.stripeCurrentPeriodEnd.toISOString(),
+                canceledAt: subscription.canceledAt?.toISOString() ?? null,
+              }
+            : null
+        }
+      />
 
       <ProfileForm />
 

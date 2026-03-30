@@ -12,12 +12,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user?.id) {
         token.id = user.id
       }
       if (user?.role) {
         token.role = user.role
+      }
+      if (user?.id || trigger === "update") {
+        try {
+          const userId = (user?.id || token.id) as string
+          const sub = await prisma.subscription.findUnique({
+            where: { userId },
+            select: { plan: true, status: true },
+          })
+          token.subscriptionPlan = sub?.status === "ACTIVE" ? sub.plan : null
+        } catch {
+          token.subscriptionPlan = null
+        }
       }
       return token
     },
@@ -32,8 +44,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           session.user.id = userId
         }
         if (token.role) {
-          session.user.role = token.role
+          session.user.role = token.role as "USER" | "MODERATOR" | "ADMIN"
         }
+        session.user.subscriptionPlan = (token.subscriptionPlan as "PREMIUM" | "MAX" | null) ?? null
       }
       return session
     },

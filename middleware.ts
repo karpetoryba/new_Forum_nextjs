@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth/auth"
 
-const PUBLIC_ROUTES = ["/", "/signin", "/signup", "/about", "/accueil", "/conversations"]
+const PUBLIC_ROUTES = ["/", "/signin", "/signup", "/about", "/accueil", "/conversations", "/pricing"]
 
 const PUBLIC_FILE = /\.(.*)$/
 
@@ -12,6 +12,7 @@ export default async function middleware(request: NextRequest) {
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/stripe/webhook") ||
     PUBLIC_FILE.test(pathname)
   ) {
     return NextResponse.next()

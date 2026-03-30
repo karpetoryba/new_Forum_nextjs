@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { Session } from "next-auth";
-import { Home, LogOut, Menu, MessageSquare, MessagesSquare, User } from "lucide-react";
+import { Crown, Home, LogOut, Menu, MessageSquare, MessagesSquare, User, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -136,11 +136,24 @@ export default function NavbarClient({ session }: NavbarClientProps) {
                       <p className="text-sm font-medium text-foreground">{displayName}</p>
                       {session?.user?.role && session.user.role !== "USER" && (
                         <span className={`text-xs px-1.5 py-0.5 rounded ${
-                          session.user.role === "ADMIN" 
-                            ? "bg-red-500/10 text-red-700 dark:text-red-400" 
+                          session.user.role === "ADMIN"
+                            ? "bg-red-500/10 text-red-700 dark:text-red-400"
                             : "bg-blue-500/10 text-blue-700 dark:text-blue-400"
                         }`}>
                           {session.user.role === "ADMIN" ? "Admin" : "Mod"}
+                        </span>
+                      )}
+                      {session?.user?.subscriptionPlan && (
+                        <span className={`inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded ${
+                          session.user.subscriptionPlan === "MAX"
+                            ? "bg-purple-500/10 text-purple-700 dark:text-purple-400"
+                            : "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400"
+                        }`}>
+                          {session.user.subscriptionPlan === "MAX" ? (
+                            <><Zap className="h-3 w-3" /> Max</>
+                          ) : (
+                            <><Crown className="h-3 w-3" /> Premium</>
+                          )}
                         </span>
                       )}
                     </div>
