@@ -130,18 +130,18 @@ export default function ConversationCard({
   // Generate gradient based on ID if not using placeholder
   const gradientColors = useMemo(() => {
     const colors = [
-      "from-blue-500/20 to-purple-500/20",
-      "from-green-500/20 to-teal-500/20",
-      "from-pink-500/20 to-rose-500/20",
-      "from-orange-500/20 to-amber-500/20",
-      "from-indigo-500/20 to-blue-500/20",
+      "from-purple-500/20 to-violet-500/20",
+      "from-violet-500/20 to-indigo-500/20",
+      "from-fuchsia-500/20 to-purple-500/20",
+      "from-indigo-500/20 to-purple-500/20",
+      "from-purple-500/20 to-pink-500/20",
     ];
     const index = parseInt(conversation.id.slice(-1), 16) % colors.length;
     return colors[index];
   }, [conversation.id]);
 
   const CardContent = (
-    <Card className={`${!isEditing ? "cursor-pointer" : ""} hover:shadow-lg transition-all group relative overflow-hidden h-full`}>
+    <Card className={`${!isEditing ? "cursor-pointer" : ""} hover:shadow-xl hover:shadow-purple-500/5 hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden h-full border-border/50`}>
         {/* Image */}
         <div className="relative h-48 w-full overflow-hidden">
           {(conversation as any).image ? (
